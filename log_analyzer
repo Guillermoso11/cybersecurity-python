@@ -1,0 +1,37 @@
+# Script: Analista de logs
+# Descripción: Este es mi primer post y mi primer proyecto. Este script sirve para escanear un archivo y buscar intentos de acceso fallidos, generando una alerta si una IP supera un número límite de intentos.
+
+def analizar_logs(archivo_log)
+limite_intentos = 3
+intentos_fallidos = {}
+
+print(f"[*] Analizando el archivo: {archivo_log}...\n")
+
+try:
+with open(archivo_log, 'r') as archivo:
+            for linea in archivo:
+                # Si encontramos un intento fallido en la línea
+                if "LOGIN_FAILED" in linea:
+                    # Extraemos la IP (asumiendo el formato estándar del archivo)
+                    partes = linea.split(" - ")
+                    ip = partes[1].replace("IP: ", "").strip()
+                    
+                    # Contamos el intento fallido para esa IP
+                    intentos_fallidos[ip] = intentos_fallidos.get(ip, 0) + 1
+
+        # Comprobamos si alguna IP ha superado el límite sospechoso
+        alertas = 0
+        for ip, conteo in intentos_fallidos.items():
+            if conteo >= limite_intentos:
+                print(f"[🚨 ALERTA DE SEGURIDAD] La IP {ip} ha intentado acceder {conteo} veces de forma fallida.")
+                alertas += 1
+        
+        if alertas == 0:
+            print("[+] No se detectaron patrones sospechosos.")
+
+    except FileNotFoundError:
+        print(f"[X] Error: El archivo {archivo_log} no existe.")
+
+if __name__ == "__main__":
+    # Ejecutamos la función con nuestro archivo de log simulado
+    analizar_logs("acceso_servidor.log")
